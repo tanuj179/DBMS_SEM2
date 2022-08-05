@@ -1,0 +1,3 @@
+# DBMS_SEM2
+LAB1
+LAB2
