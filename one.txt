@@ -1,0 +1,78 @@
+
+create table musician(ssn varchar(10) primary key, name varchar(20), address varchar(20), phone int(10) );
+
+create table instrument(i_id varchar(10) primary key, name varchar(10), m_key varchar(10));
+
+create table album(a_id varchar(10) primary key, title varchar(10), copyright_date date, format varchar(10), ssn varchar(10), foreign key(ssn) references musician(ssn));
+
+create table song(s_id varchar(10) primary key, name varchar(10), author varchar(10), a_id varchar(10), foreign key(a_id) references album(a_id));
+
+create table perform(ssn varchar(10), s_id varchar(10), foreign key(ssn) references musician(ssn), foreign key(s_id) references song(s_id), primary key(ssn, s_id));
+
+create table play(ssn varchar(10), i_id varchar(10), foreign key(ssn) references musician(ssn), foreign key(i_id) references instrument(i_id), primary key(ssn, i_id));
+
+
+
+insert into musician values("m001", "justin", "add1", 1234567890);
+insert into musician values("m002", "taylor", "add2", 1234567891);
+insert into musician values("m003", "drake", "add3", 1234567892);
+insert into musician values("m004", "rihana", "add4", 1234567893);
+insert into musician values("m005", "ariana", "add5", 1234567894);
+
+
+
+insert into instrument values("i001", "guitar", "c");
+insert into instrument values("i002", "violin", "f");
+insert into instrument values("i003", "ukulele", "e");
+insert into instrument values("i004", "piano", "a");
+insert into instrument values("i005", "flute", "g");
+
+
+
+insert into album values("a001","plus", "1999-07-19", "format1", "m001");
+insert into album values("a002","minus", "1995-03-22", "format2", "m002");
+insert into album values("a003","division", "2000-09-29", "format1", "m002");
+insert into album values("a004","equals", "2005-07-19", "format3", "m003");
+insert into album values("a005","reputation", "2015-07-19", "format4", "m004");
+
+
+
+insert into song values("s001", "honest", "author1", "a001");
+insert into song values("s002", "holdon", "author2", "a002");
+insert into song values("s003", "dress", "author3", "a002");
+insert into song values("s004", "criminal", "author4", "a003");
+insert into song values("s005", "seven", "author5", "a004");
+
+
+
+insert into perform values("m001", "s001");
+insert into perform values("m002", "s001");
+insert into perform values("m003", "s001");
+insert into perform values("m004", "s001");
+insert into perform values("m001", "s002");
+insert into perform values("m002", "s003");
+insert into perform values("m003", "s004");
+insert into perform values("m004", "s005");
+
+
+
+insert into play values("m001", "i001");
+insert into play values("m001", "i002");
+insert into play values("m002", "i001");
+insert into play values("m003", "i003");
+insert into play values("m004", "i004");
+insert into play values("m005", "i002");
+
+
+
+select m.name, s.name,a.title from musician m, song s, album a, perform p where p.ssn = m.ssn and s.s_id = p.s_id and a.a_id = s.a_id;
+
+select m.ssn from musician m where m.ssn not in(select m.ssn from musician m, album a where m.ssn = a.ssn);
+
+select s.* from song s, musician m, perform p where s.s_id = p.s_id and p.ssn = m.ssn group by(p.s_id) having count(p.ssn) > 3;
+
+select i.name as instrument, count(p.i_id), count(p.i_id)/(select count(*) from musician m) as avg from instrument i, play p where p.i_id = i.i_id group by(p.i_id) having count(p.i_id);
+
+# select m.name from album a, play p, musician m where > (select avg() from )
+
+select m.* from musician m where m.ssn in ( select ssn from play group by ssn having count(i_id) = (select count(i_id) from instrument));

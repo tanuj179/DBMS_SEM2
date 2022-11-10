@@ -1,0 +1,59 @@
+sudo docker start mymongo
+sudo docker exec -it mymongo bash
+mongosh
+
+
+
+use fourthlab
+
+
+db.createCollection("employee")
+db.createCollection("department")
+db.createCollection("project")
+
+
+db.department.insertMany([{"deptid": "d1", "deptname": "finance"}, {"deptid": "d2", "deptname": "marketing"}])
+
+db.project.insertMany([{"projectid": "123" }, {"projectid": "124"}, {"projectid": "125"}])
+
+db.employee.insertMany([{"empname":"vishnu","ssn":"1","salary":50000,"exp":12,"dob":"27-04-2000","deptid":"d1","dependancy":[{"name":"rajesh"}],workon:[{"projectid":"123","hour":5},{"projectid":"124","hour":5}]}   
+,
+{"empname":"rakesh","ssn":"124","salary":65000,"exp":15,"dob":"18-04-1999","deptid":"d2","dependancy":[{"name":"rahul raj"}],workon:[{"projectid":"123","hour":10},{"projectid":"124","hour":15}]}
+,
+{"empname":"rathan","ssn":"125","salary":55000,"exp":14,"dob":"16-05-1999","deptid":"d2","dependancy":[{"name":"harsha"}],workon:[{"projectid":"123","hour":8},{"projectid":"124","hour":13},{"projectid":"125","hour":14}]},
+{"empname":"harsha","ssn":"126","salary":45000,"exp":03,"dob":"16-05-2000","deptid":"d1",workon:[{"projectid":"123","hour":8},{"projectid":"124","hour":13}]},
+{"empname":"bharath","ssn":"127","salary":35000,"exp":5,"dob":"27-02-1999","deptid":"d1","dependancy":[{"name":"chanduru"}],workon:[{"projectid":"123","hour":8},{"projectid":"125","hour":14}]}])
+
+
+
+
+
+ 
+db.employee.find().sort({"ssn":-1})
+
+ 
+db.employee.find({deptid:'d1'})
+
+db.employee.find({deptid:db.department.aggregate([{$match:{deptname:"finance"}},{$project:{deptid:1}}]).toArray()[0].deptid})
+
+ 
+db.employee.find({salary:db.employee.aggregate([{$group:{_id:null,maxsal:{$max:'$salary'}}}]).toArray()[0].maxsal})
+
+
+db.employee.update({_id:db.employee.aggregate([{$project:{count:{$size:'$workon'}}},{$sort:{'count':-1}}]).toArray()[0]._id},{$set:{"award":"Employee of the year"}})
+
+
+db.employee.deleteOne({exp:db.employee.aggregate([{$group:{_id:null,mine:{$min:'$exp'}}}]).toArray()[0].mine})
+
+
+
+
+
+
+
+db.employee.find({$and: [{gender: "male"}, {designation: "senior se"}]}).pretty()
+db.employee.find({qualification: "MCA"})
+db.employee.aggregate([{"$group": {_id: "$deptid", count: {$sum: 1}}}])
+db.employee.find({$and: [{gender: "female"}, {salary: {$gt: db.employee.aggregate([{$match: {deptid: "d1"}}, {$group: {_id: "$deptid", avg: {$avg: "$salary"}}}].toArray()[0].avg)}}]})
+
+

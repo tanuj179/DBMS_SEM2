@@ -1,0 +1,125 @@
+1. SOLAR_PANEL TABLE:
+create table solar_panel(pv_module varchar(10) primary key, capacity int(3), type varchar(20));
+
+
+2. DISTRIBUTOR TABLE:
+create table distributor(tin_no varchar(10) primary key, name varchar(10), address varchar(10), phone bigint(10));
+
+
+3. SOLD_BY TABLE:
+create table sold_by(pv_module varchar(10),tin_no varchar(10),foreign key(pv_module) references solar_panel(pv_module),foreign key(tin_no) references distributor(tin_no),primary key(pv_module, tin_no));
+
+4. USER TABLE:
+create table user(building_no int(5) primary key, address varchar(10));
+
+
+5. PURCHASED BY:
+create table purchased_by(pv_module varchar(10), building_no int(5),foreign key(pv_module) references solar_panel(pv_module),foreign key(building_no) references user(building_no), primary key(pv_module, building_no));
+
+
+6. INSTALLATION TABLE:
+create table installation(pv_module varchar(10), tin_no varchar(10), building_no int(5),foreign key(pv_module) references solar_panel(pv_module), foreign key(tin_no) references distributor(tin_no), foreign key(building_no) references user(building_no), charge int(5), ptype varchar(10), date DATE, primary key(pv_module, tin_no, building_no));
+
+1. SOLAR_PANEL DATA:
+insert into solar_panel values('m_001', 200, 'monocrystallline');
+insert into solar_panel values('m_002', 170, 'monocrystallline');
+insert into solar_panel values('m_003', 270, 'monocrystallline');
+insert into solar_panel values('p_001', 280, 'polycrystallline');
+insert into solar_panel values('p_002', 210, 'polycrystallline');
+insert into solar_panel values('p_003', 170, 'polycrystallline');
+
+
+2. DISTRIBUTOR DATA:
+insert into distributor values('tin_001', 'VENDOR1', "BENGALURU", 7975886469);
+insert into distributor values('tin_002', 'VENDOR2', "MANDYA", 7975886468);
+insert into distributor values('tin_003', 'VENDOR3', "MYSORE", 7975886461);
+insert into distributor values('tin_004', 'VENDOR4', "MANGLORE", 7975886462);
+insert into distributor values('tin_005', 'VENDOR5', "HUBLI", 7975886463);
+insert into distributor values('tin_006', 'VENDOR6', "DHARWAD", 7975886465);
+
+
+3. SOLD_BY DATA:
+insert into sold_by values("m_001", "tin_001");
+insert into sold_by values("m_002", "tin_001");
+insert into sold_by values("m_003", "tin_003");
+insert into sold_by values("m_001", "tin_003");
+insert into sold_by values("m_002", "tin_002");
+insert into sold_by values("m_003", "tin_002");
+
+
+4. USER DATA:
+insert into user values(01, "SRINAGAR");
+insert into user values(02, "SUNCITY");
+insert into user values(03, "KENGERI");
+insert into user values(04, "NAGARBHAVI");
+insert into user values(05, "RAMNAGAR");
+insert into user values(06, "KODAGU");
+insert into user values(07, "YPR");
+insert into user values(08, "KBS");
+insert into user values(09, "KRS");
+
+
+
+5. PURCHASED_BY DATA:
+insert into purchased_by values("m_001", 01);
+insert into purchased_by values("m_002", 02);
+insert into purchased_by values("m_003", 03);
+insert into purchased_by values("p_003", 04);
+insert into purchased_by values("p_002", 05);
+insert into purchased_by values("p_001", 01);
+
+
+6. INSTALLATION DATA:
+insert into installation values("m_001", "tin_001", 01, 40000, "DOMESTIC", '2020-08-22');
+insert into installation values("m_002", "tin_004", 02, 40000, "COMMERCIAL", '2020-09-12');
+insert into installation values("m_003", "tin_001", 03, 40000, "DOMESTIC", '2021-01-12');
+insert into installation values("p_001", "tin_003", 07, 5000, "DOMESTIC", '2017-03-02');
+insert into installation values("p_002", "tin_004", 08, 5500, "DOMESTIC", '2018-03-02');
+insert into installation values("p_003", "tin_005", 09, 5550, "COMMERCIAL", '2019-03-02');
+
+
+
+1. QUERY 1:
+select d.name, count(d.tin_no) from distributor d, installation i where i.tin_no=d.tin_no and i.ptype="DOMESTIC" group by d.tin_no order by max(d.tin_no);
+
+
+2. QUERY 2:
+select distinct u.address,u.building_no from user u,solar_panel p,installation i where u.building_no=i.building_no and p.pv_module=i.pv_module and p.type="monocrystallline";
+
+
+
+3. QUERY 3:
+select u.address from user u,solar_panel p,installation i where u.building_no=i.building_no and p.pv_module=i.pv_module and p.capacity=(select max(capacity) from solar_panel);
+
+
+
+4. QUERY 4:
+select u.address, sum(i.charge) from user u, installation i, solar_panel s where u.building_no = i.building_no and s.pv_module = i.pv_module and s.type = "polycrystallline" and exists( select u.address from user u, installation i, solar_panel
+s where u.building_no = i.building_no and s.pv_module = i.pv_module and s.type = "monocrystallline") group by address;
+
+
+
+
+5. QUERY 5:
+select d.*,s.*,i.date from distributor d, solar_panel s, installation i where d.tin_no=i.tin_no and s.pv_module=i.pv_module and i.date in(select min(date) from installation);
+
+
+6. QUERY 6:
+select d.type,avg(d.charge) from ( select a.*,b.capacity,c.address,b.type from installation a inner join solar_panel b on a.pv_module=b.pv_module inner join user c on c.building_no=a.building_no where a.ptype="commercial")as d GROUP by d.type; 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
